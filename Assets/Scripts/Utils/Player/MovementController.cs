@@ -3,13 +3,12 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player : MonoBehaviour
+public class MovementController : MonoBehaviour
 {
     private Rigidbody2D _rigidbody2D;
 
-    [SerializeField] private float _speed;
-    private Vector2 _moveDirection;
-    private Vector2 _dashDirection;
+    [SerializeField] private float _speed, _dashForce;
+    private Vector2 _moveDirection, _dashDirection;
     private bool _isOnDash;
 
     private Interactor _interactor;
@@ -25,20 +24,20 @@ public class Player : MonoBehaviour
     {
         if(_isOnDash)
         {
-            UpdateOnDash();
+            Dash();
         }
         else
         {
-            NormalUpdate();
+            Move();
         }
     }
 
-    private void UpdateOnDash()
+    private void Dash()
     {
-        _rigidbody2D.MovePosition(_rigidbody2D.position + _dashDirection * _speed * 5 * Time.fixedDeltaTime);
+        _rigidbody2D.AddForce(_dashDirection*_dashForce);
     }
 
-    private void NormalUpdate()
+    private void Move()
     {
         if (_moveDirection != Vector2.zero)
         {
@@ -67,7 +66,7 @@ public class Player : MonoBehaviour
         _dashDirection = _moveDirection.normalized;
         _isOnDash = true;
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.5f);
 
         _isOnDash = false;
         _dashDirection = Vector2.zero;

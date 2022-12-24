@@ -4,38 +4,61 @@ using UnityEngine;
 
 public class Interactor : MonoBehaviour
 {
-    [SerializeField] private Transform _interactionPoint;
-    [SerializeField] private float _interactionRadius;
-    [SerializeField] private LayerMask _interactionMask;
+    private Transform _transform;
 
-    private Collider2D[] _colliders;
+    private List<Transform> _interactableTransforms = new();
     private IInteractable _interactable;
+
+    void Start() 
+    {
+        _transform = gameObject.transform;
+    }
 
     void Update()
     {
-        _colliders = Physics2D.OverlapCircleAll(_interactionPoint.position, _interactionRadius, _interactionMask);
-
-        if(_colliders.Length > 0)
+        if(_interactableTransforms.Count > 0)
         {
-            IInteractable newInteractable = NearestInteractable(_colliders);
-
-            if (_interactable == null)
-            {
-                _interactable = newInteractable;
-                _interactable.Select();
-            }
-            else if (_interactable != newInteractable) 
-            { 
-                _interactable.Deselect(); 
-                _interactable = newInteractable;
-                _interactable.Select();
-            }
+            ChooseInteractable();
         }
         else if(_interactable != null) 
-        { 
-            _interactable.Deselect();
-            _interactable = null; 
+        {
+            DeleteInteractable();
         }
+    }
+
+    private void ChooseInteractable()
+    {
+        IInteractable newInteractable = GetNearestInteractable();
+
+        if (_interactable == newInteractable) return;
+        
+        if (_interactable != null) _interactable.Deselect();
+
+        _interactable = newInteractable;
+        _interactable.Select();
+    }
+
+    private void DeleteInteractable()
+    {
+        _interactable.Deselect();
+        _interactable = null; 
+    }
+
+    private IInteractable GetNearestInteractable()
+    {
+        Transform interactableObject = null;
+        float minDistance = 0;
+
+        foreach(var interactableTransform in _interactableTransforms)
+        {
+            float distance = Vector2.Distance(_transform.position, interactableTransform.position);
+            if (distance < minDistance || minDistance == 0) 
+            {
+                minDistance = distance;
+                interactableObject = interactableTransform;
+            }
+        }
+        return interactableObject.GetComponent<IInteractable>();
     }
 
     public void Interact()
@@ -43,20 +66,21 @@ public class Interactor : MonoBehaviour
         if(_interactable != null) { _interactable.Interact(); }
     }
 
-    private IInteractable NearestInteractable(Collider2D[] colliders)
+    private void OnTriggerEnter2D(Collider2D other) 
     {
-        IInteractable interactable = null;
-        float minDistance = 0;
-
-        foreach(var collider in colliders)
+        IInteractable interactable = other.GetComponent<IInteractable>();
+        if (other.TryGetComponent<IInteractable>(out interactable))
         {
-            float distance = Vector2.Distance(_interactionPoint.position, collider.transform.position);
-            if (distance < minDistance || minDistance == 0) 
-            {
-                minDistance = distance;
-                interactable = collider.GetComponent<IInteractable>();
-            }
+            _interactableTransforms.Add(other.transform);
         }
-        return interactable;
+    }
+
+    private void OnTriggerExit2D(Collider2D other) 
+    {
+        IInteractable interactable = other.GetComponent<IInteractable>();
+        if (other.TryGetComponent<IInteractable>(out interactable))
+        {
+            _interactableTransforms.Remove(other.transform);
+        }
     }
 }

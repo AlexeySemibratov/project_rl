@@ -15,12 +15,12 @@ public class InteractableObjectTest : MonoBehaviour, IInteractable
         transform.localScale = transform.localScale + new Vector3(0.2f,0.2f,0.2f);
     }
 
-    void IInteractable.Deselect()
+    public void Deselect()
     {
         _spriteRenderer.color = new Color(1,1,1,1);;
     }
 
-    void IInteractable.Select()
+    public void Select()
     {
         _spriteRenderer.color = new Color(0,1,0,1);
     }
