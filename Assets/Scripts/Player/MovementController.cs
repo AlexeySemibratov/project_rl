@@ -7,7 +7,8 @@ public class MovementController : MonoBehaviour
 {
     private Rigidbody2D _rigidbody2D;
 
-    [SerializeField] private float _speed, _dashForce;
+    [SerializeField] private float _dashForce;
+    private float _speed;
     private Vector2 _moveDirection, _dashDirection;
     private bool _isOnDash;
 
@@ -17,6 +18,8 @@ public class MovementController : MonoBehaviour
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _interactor = GetComponent<Interactor>();
+
+        _speed = GetComponent<PlayerCharacteristics>().Speed;
     }
 
     
