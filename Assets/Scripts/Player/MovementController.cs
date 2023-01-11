@@ -19,7 +19,7 @@ public class MovementController : MonoBehaviour
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _interactor = GetComponent<Interactor>();
 
-        _speed = GetComponent<PlayerCharacteristics>().Speed;
+        _speed = GetComponent<PlayerCharacteristics>().GetSpeed();
     }
 
     
